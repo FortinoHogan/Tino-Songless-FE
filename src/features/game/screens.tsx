@@ -119,7 +119,7 @@ export function Lobby({ s, a }: { s: State; a: Actions }) {
         </div>
       ))}
       <div className="label" style={{ margin: '16px 0 8px' }}>
-        Round length
+        Guess time limit
       </div>
       {host ? (
         <select
@@ -129,13 +129,13 @@ export function Lobby({ s, a }: { s: State; a: Actions }) {
         >
           {[10, 15, 20, 30, 45, 60].map((n) => (
             <option key={n} value={n}>
-              {n} seconds
+              {n} seconds to guess
             </option>
           ))}
         </select>
       ) : (
         <div className="row">
-          <span>{g.roundSeconds ?? 10} seconds per round</span>
+          <span>{g.roundSeconds ?? 10} seconds to guess per song</span>
         </div>
       )}
       <div className="actions">
@@ -164,6 +164,10 @@ export const Starting = () => (
   </Shell>
 )
 
+const REVEAL_SECONDS = 30
+const REVEAL_PILLS = [0.1, 0.5, 1, 3] as const
+const MAX_REVEAL_PILL = REVEAL_PILLS[REVEAL_PILLS.length - 1]
+
 export function Play({
   s,
   a,
@@ -177,6 +181,7 @@ export function Play({
 }) {
   const left = useLeft(Date.parse(round.startedAt) + round.duration * 1000, s.offset)
   const [pos, setPos] = useState(0)
+  const [clipSeconds, setClipSeconds] = useState(0.1)
   const [playing, setPlaying] = useState(false)
   const [g, setG] = useState('')
   const [sugg, setSugg] = useState<SongSuggestion[]>([])
@@ -184,11 +189,10 @@ export function Play({
   const [hi, setHi] = useState(-1)
   const reqId = useRef(0)
 
-  // Each wrong guess unlocks one more second of audio (first clip is 1s).
-  const limit = Math.min(1 + s.wrong, round.duration)
-  // Live value of a correct answer right now: 10000 at the start, minus a second's worth per wrong guess.
-  const worth = Math.max(0, Math.round((10000 * (left - s.wrong)) / round.duration))
-  const locked = !!s.myGuess || s.ended || left <= 0 || s.phase === 'submitting'
+  const limit = Math.min(clipSeconds, REVEAL_SECONDS)
+  const scoreProgress = Math.max(0, (limit - 0.1) / (REVEAL_SECONDS - 0.1))
+  const worth = Math.round(12500 - scoreProgress * 11500)
+  const locked = !!s.myGuess || s.mySkipped || s.ended || left <= 0 || s.phase === 'submitting'
 
   const playClip = () => {
     const el = audio.el.current
@@ -198,12 +202,17 @@ export function Play({
   }
 
   useEffect(() => {
+    setClipSeconds(0.1)
+    setPos(0)
+  }, [round.roundId])
+
+  useEffect(() => {
     setG('')
     setSugg([])
   }, [round.roundId])
 
   useEffect(() => {
-    // Wrong guess: clear the box and replay with the newly unlocked second.
+    // Wrong guess clears the box but does not reveal more audio automatically.
     if (s.wrong > 0) {
       setG('')
       setSugg([])
@@ -240,7 +249,7 @@ export function Play({
         .then((r) => {
           if (id === reqId.current) setSugg(r)
         })
-        .catch(() => {})
+        .catch(() => { })
     }, 180)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -254,6 +263,16 @@ export function Play({
     }
     if (!el.paused) el.pause()
     else playClip()
+  }
+
+  const revealTo = (seconds: number) => {
+    setClipSeconds((current) => Math.max(current, Math.min(REVEAL_SECONDS, seconds)))
+    playClip()
+  }
+
+  const revealMore = () => {
+    setClipSeconds((current) => Math.min(REVEAL_SECONDS, current + 1))
+    playClip()
   }
 
   const pick = (x: SongSuggestion) => {
@@ -285,10 +304,10 @@ export function Play({
 
   return (
     <Shell>
-      <Head sub="Name the song. Wrong guesses unlock one more second." />
+      <Head sub="Name the song. Reveal more audio when you need it." />
       <div className="stage">
         <div className="clip-label">
-          You can hear <b>{limit}</b>s · <b>{Math.ceil(left)}</b>s left · worth <b>{worth}</b> pts
+          Clip <b>{limit.toFixed(1)}</b>s · <b>{Math.ceil(left)}</b>s left · worth <b>{worth}</b> pts
         </div>
         <button className="play-btn" onClick={toggle} aria-label="Play clip">
           <svg viewBox="0 0 24 24">
@@ -296,16 +315,54 @@ export function Play({
           </svg>
         </button>
         <div className="track-bar">
-          <div className="track-limit" style={{ width: `${(limit / round.duration) * 100}%` }} />
+          <div className="track-limit" style={{ width: `${(limit / REVEAL_SECONDS) * 100}%` }} />
           <div
             className="track-fill"
-            style={{ width: `${Math.min(100, (pos / round.duration) * 100)}%` }}
+            style={{ width: `${Math.min(100, (pos / REVEAL_SECONDS) * 100)}%` }}
           />
         </div>
         <div className="ticks">
           <span>0s</span>
-          <span className="tick done">{limit}s unlocked</span>
-          <span>{round.duration}s</span>
+          <span className="tick done">{limit.toFixed(1)}s unlocked</span>
+          <span>{REVEAL_SECONDS}s</span>
+        </div>
+        <div className="reveal-controls">
+          <div className="reveal-steps" aria-label="Audio reveal amount">
+            {REVEAL_PILLS.map((step) => {
+              const pillLocked =
+                locked || limit > MAX_REVEAL_PILL + 0.001 || step < limit - 0.001
+              return (
+                <button
+                  key={step}
+                  className={`step-pill ${Math.abs(limit - step) < 0.001 ? 'selected' : ''}`}
+                  type="button"
+                  aria-pressed={Math.abs(limit - step) < 0.001}
+                  disabled={pillLocked}
+                  onClick={() => revealTo(step)}
+                >
+                  {step}s
+                </button>
+              )
+            })}
+          </div>
+          <div className="actions">
+            <button
+              className="secondary"
+              type="button"
+              disabled={locked || limit >= REVEAL_SECONDS}
+              onClick={revealMore}
+            >
+              Reveal +1s
+            </button>
+            <button
+              className="secondary"
+              type="button"
+              disabled={locked}
+              onClick={() => a.skip(limit)}
+            >
+              Skip song
+            </button>
+          </div>
         </div>
         <div className="volume-row">
           <svg viewBox="0 0 24 24">
@@ -333,7 +390,7 @@ export function Play({
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          if (g.trim() && !locked) a.submit(g.trim())
+          if (g.trim() && !locked) a.submit(g.trim(), limit)
         }}
       >
         <div className="combo">
@@ -379,9 +436,11 @@ export function Play({
         <div className="feedback">
           Correct! +{s.myPoints ?? 0} pts · {solved}/{total} solved
         </div>
+      ) : s.mySkipped ? (
+        <div className="feedback bad">Skipped · 0 pts</div>
       ) : s.wrong > 0 ? (
         <div className="feedback bad">
-          Not it. +1s unlocked (−1s of score) · {solved}/{total} solved
+          Not it · {solved}/{total} solved
         </div>
       ) : null}
 
@@ -398,10 +457,42 @@ export function Play({
   )
 }
 
-export function Result({ s }: { s: State }) {
+const INTER_ROUND_CLIP_END = 30.1
+
+export function Result({ s, audio, a }: { s: State; audio: AudioCtl; a?: Actions }) {
   const r = s.result
   const next = r?.nextRoundAt ? Date.parse(r.nextRoundAt) : undefined
   const left = useLeft(next, s.offset)
+  const [playing, setPlaying] = useState(false)
+
+  useEffect(() => {
+    const el = audio.el.current
+    if (!el) return
+    const tick = () => {
+      if (!el.paused && el.currentTime >= INTER_ROUND_CLIP_END) el.pause()
+      setPlaying(!el.paused)
+    }
+    tick()
+    const i = setInterval(tick, 100)
+    el.addEventListener('play', tick)
+    el.addEventListener('pause', tick)
+    return () => {
+      clearInterval(i)
+      el.removeEventListener('play', tick)
+      el.removeEventListener('pause', tick)
+    }
+  }, [audio.el, s.result?.roundNumber, s.audio])
+
+  const togglePlayback = () => {
+    const el = audio.el.current
+    if (!el) return
+    if (!el.paused) el.pause()
+    else {
+      if (el.currentTime >= INTER_ROUND_CLIP_END) el.currentTime = 0.1
+      void el.play()
+    }
+  }
+
   if (!r) return null
   return (
     <Shell>
@@ -414,15 +505,40 @@ export function Result({ s }: { s: State }) {
           {r.song.album ? ` · ${r.song.album}` : ''}
         </div>
       </div>
-      {r.players.map((p) => (
-        <div key={p.playerId} className={`row ${p.correct ? 'good' : 'bad'}`}>
-          <span>
-            {p.correct ? '✓' : '✕'} {p.name}
-            <small>{p.guess || '—'}</small>
-          </span>
-          <b>+{p.points}</b>
+      {r.nextRoundAt && (
+        <div className="actions" style={{ marginBottom: 12 }}>
+          <button className="secondary" type="button" onClick={togglePlayback}>
+            {playing ? 'Stop song' : 'Play song'}
+          </button>
+          {s.audio === 'error' && a && (
+            <button className="secondary" type="button" onClick={a.retryAudio}>
+              Reload audio
+            </button>
+          )}
         </div>
-      ))}
+      )}
+      {r.players.map((p) => {
+        const own = p.playerId === s.me?.playerId
+        const skipped = p.skipped || (own && s.mySkipped)
+        const usedSeconds = p.clipSeconds ?? (own ? s.myClipSeconds : undefined)
+        return (
+          <div key={p.playerId} className={`row ${p.correct ? 'good' : 'bad'}`}>
+            <span>
+              {p.name}
+              <small>
+                {p.correct
+                  ? usedSeconds === undefined
+                    ? '—'
+                    : `${usedSeconds.toFixed(1)}s`
+                  : skipped
+                    ? 'Skipped'
+                    : 'Missed'}
+              </small>
+            </span>
+            <b>{p.points}</b>
+          </div>
+        )
+      })}
       <div className="label" style={{ margin: '16px 0 8px' }}>
         Scores
       </div>

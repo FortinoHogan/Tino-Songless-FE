@@ -54,8 +54,13 @@ export const joinGame = (code: string, displayName: string) =>
   req<Session>('/api/games/join', { code, displayName })
 export const getGame = (id: string) => req<Snapshot>(`/api/games/${id}`)
 export const startGame = (id: string) => req<void>(`/api/games/${id}/start`, {})
-export const sendGuess = (id: string, roundId: string, guess: string) =>
-  req<GuessAck>(`/api/games/${id}/guess`, { roundId, guess })
+export const sendGuess = (
+  id: string,
+  roundId: string,
+  guess: string,
+  clipSeconds: number,
+  skipped = false,
+) => req<GuessAck>(`/api/games/${id}/guess`, { roundId, guess, clipSeconds, skipped })
 export const updateSettings = (id: string, roundSeconds: number) =>
   req<void>(`/api/games/${id}/settings`, { roundSeconds })
 export const searchSongs = (q: string) =>

@@ -28,10 +28,17 @@ export default function App() {
       break
     case 'playing':
     case 'submitting':
-      body = s.round ? <Play s={s} a={a} audio={audio} round={s.round} /> : <Starting />
+      body =
+        s.ended && s.result ? (
+          <Result s={s} audio={audio} a={a} />
+        ) : s.round ? (
+          <Play s={s} a={a} audio={audio} round={s.round} />
+        ) : (
+          <Starting />
+        )
       break
     case 'roundResult':
-      body = <Result s={s} />
+      body = <Result s={s} audio={audio} a={a} />
       break
     case 'leaderboard':
     case 'finished':

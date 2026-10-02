@@ -37,6 +37,8 @@ export interface Guess {
   guess: string
   correct: boolean
   points: number
+  clipSeconds?: number
+  skipped?: boolean
 }
 export interface Score {
   playerId: string
@@ -67,6 +69,8 @@ export interface Snapshot {
   result?: RoundResult
   answered?: string[]
   myGuess?: string
+  myClipSeconds?: number
+  mySkipped?: boolean
   wrong?: number
   ended?: boolean
   scores?: Score[]

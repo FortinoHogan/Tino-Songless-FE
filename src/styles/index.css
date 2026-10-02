@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 :root {
   --bg: #10141a;
   --panel: #171d26;
@@ -13,12 +14,14 @@
   --good: #4fb477;
   --sans: -apple-system, system-ui, 'Segoe UI', sans-serif;
 }
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
 }
+
 .page {
   min-height: 100vh;
   display: flex;
@@ -26,6 +29,7 @@ body {
   justify-content: center;
   padding: 24px;
 }
+
 .card {
   width: 100%;
   max-width: 460px;
@@ -35,27 +39,32 @@ body {
   padding: 28px 26px 24px;
   animation: pop 0.3s ease-out;
 }
+
 h1 {
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 1.5rem;
   margin: 0 0 2px;
   font-weight: 600;
 }
+
 .sub {
   color: var(--dim);
   font-size: 0.85rem;
   margin: 0 0 22px;
 }
+
 .label {
   font-size: 0.78rem;
   color: var(--dim);
   margin-bottom: 10px;
   letter-spacing: 0.02em;
 }
+
 .label.mid {
   text-align: center;
   margin: 16px 0 10px;
 }
+
 .field {
   width: 100%;
   box-sizing: border-box;
@@ -68,17 +77,21 @@ h1 {
   outline: none;
   font-family: var(--sans);
 }
+
 .field:focus {
   border-color: var(--accent-dim);
 }
+
 .field:disabled {
   opacity: 0.5;
 }
+
 .field.code {
   text-align: center;
   letter-spacing: 0.35em;
   text-transform: uppercase;
 }
+
 .start-btn {
   width: 100%;
   margin-top: 12px;
@@ -91,10 +104,12 @@ h1 {
   font-weight: 700;
   cursor: pointer;
 }
+
 .start-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
+
 button.secondary {
   flex: 1;
   padding: 10px;
@@ -106,35 +121,43 @@ button.secondary {
   cursor: pointer;
   font-family: var(--sans);
 }
+
 button.secondary:hover {
   border-color: var(--accent-dim);
   color: var(--ink);
 }
+
 button.secondary:disabled {
   opacity: 0.4;
   cursor: default;
 }
+
 button.wide {
   width: 100%;
 }
+
 .actions {
   display: flex;
   gap: 8px;
   margin-top: 12px;
 }
+
 .stage {
   text-align: center;
   padding: 22px 0 10px;
 }
+
 .clip-label {
   font-size: 0.72rem;
   color: var(--dim);
   margin-bottom: 14px;
 }
+
 .clip-label b {
   color: var(--accent);
   font-weight: 600;
 }
+
 .play-btn {
   width: 78px;
   height: 78px;
@@ -147,21 +170,26 @@ button.wide {
   justify-content: center;
   transition: transform 0.12s;
 }
+
 .play-btn:hover {
   transform: scale(1.04);
 }
+
 .play-btn:active {
   transform: scale(0.97);
 }
+
 .play-btn:disabled {
   background: var(--line);
   cursor: default;
 }
+
 .play-btn svg {
   width: 26px;
   height: 26px;
   fill: #10141a;
 }
+
 .track-bar {
   height: 4px;
   background: var(--line);
@@ -170,6 +198,7 @@ button.wide {
   position: relative;
   overflow: hidden;
 }
+
 .track-fill {
   position: absolute;
   left: 0;
@@ -178,6 +207,7 @@ button.wide {
   background: var(--accent-dim);
   border-radius: 2px;
 }
+
 .ticks {
   display: flex;
   justify-content: space-between;
@@ -185,9 +215,39 @@ button.wide {
   color: var(--dim);
   padding: 0 4px;
 }
+
 .tick.done {
   color: var(--accent);
 }
+
+.reveal-controls {
+  margin-top: 14px;
+}
+
+.reveal-steps {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.step-pill {
+  min-width: 52px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dim);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.step-pill.selected {
+  border-color: var(--accent-dim);
+  background: rgba(255, 210, 63, 0.1);
+  color: var(--accent);
+}
+
 .volume-row {
   display: flex;
   align-items: center;
@@ -195,11 +255,13 @@ button.wide {
   gap: 8px;
   margin-top: 18px;
 }
+
 .volume-row svg {
   width: 16px;
   height: 16px;
   fill: var(--dim);
 }
+
 .vol {
   -webkit-appearance: none;
   appearance: none;
@@ -210,6 +272,7 @@ button.wide {
   outline: none;
   cursor: pointer;
 }
+
 .vol::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 13px;
@@ -217,6 +280,7 @@ button.wide {
   border-radius: 50%;
   background: var(--accent);
 }
+
 .vol::-moz-range-thumb {
   width: 13px;
   height: 13px;
@@ -224,6 +288,7 @@ button.wide {
   border-radius: 50%;
   background: var(--accent);
 }
+
 .feedback {
   margin-top: 16px;
   padding: 12px 14px;
@@ -233,6 +298,7 @@ button.wide {
   border: 1px solid var(--accent-dim);
   color: var(--accent);
 }
+
 .footer-row {
   display: flex;
   justify-content: space-between;
@@ -240,6 +306,7 @@ button.wide {
   font-size: 0.78rem;
   color: var(--dim);
 }
+
 .row {
   display: flex;
   justify-content: space-between;
@@ -250,25 +317,31 @@ button.wide {
   margin-bottom: 6px;
   font-size: 0.88rem;
 }
+
 .row.me {
   border-color: var(--accent-dim);
   background: rgba(255, 210, 63, 0.07);
 }
+
 .row.good {
   border-color: var(--good);
   background: rgba(79, 180, 119, 0.12);
 }
+
 .row.bad {
   border-color: var(--bad);
   background: rgba(224, 85, 90, 0.1);
 }
+
 .row small {
   color: var(--dim);
   margin-left: 8px;
 }
+
 .row b {
   color: var(--accent);
 }
+
 .code-big {
   text-align: center;
   font-family: Georgia, serif;
@@ -277,10 +350,12 @@ button.wide {
   color: var(--accent);
   margin: 4px 0 18px;
 }
+
 .reveal {
   text-align: center;
   margin-bottom: 16px;
 }
+
 .reveal img {
   width: 160px;
   height: 160px;
@@ -290,17 +365,21 @@ button.wide {
   margin: 0 auto 14px;
   display: block;
 }
+
 .reveal .t {
   font-size: 1.05rem;
   font-weight: 600;
 }
+
 .reveal .a {
   font-size: 0.85rem;
   color: var(--dim);
 }
+
 .end {
   text-align: center;
 }
+
 .end .big {
   color: var(--accent);
   font-size: 2.6rem;
@@ -308,23 +387,27 @@ button.wide {
   display: block;
   margin: 10px 0 18px;
 }
+
 .err {
   margin-top: 12px;
   text-align: center;
   font-size: 0.85rem;
   color: #ff9498;
 }
+
 .dim {
   text-align: center;
   color: var(--dim);
   font-size: 0.85rem;
   margin-top: 14px;
 }
+
 @keyframes pop {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: none;
@@ -339,9 +422,11 @@ button.wide {
   background: rgba(255, 210, 63, 0.22);
   border-radius: 2px;
 }
+
 .combo {
   position: relative;
 }
+
 .suggest {
   position: absolute;
   left: 0;
@@ -358,6 +443,7 @@ button.wide {
   max-height: 260px;
   overflow-y: auto;
 }
+
 .suggest li {
   display: flex;
   justify-content: space-between;
@@ -367,13 +453,16 @@ button.wide {
   font-size: 0.88rem;
   cursor: pointer;
 }
+
 .suggest li small {
   color: var(--dim);
 }
+
 .suggest li:hover,
 .suggest li.hi {
   background: rgba(255, 210, 63, 0.14);
 }
+
 .feedback.bad {
   background: rgba(224, 85, 90, 0.1);
   border-color: var(--bad);
